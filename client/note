@@ -2,3 +2,5 @@ redux - better state management
 @reduxjs/tookit - very easy way to use redux
 redux-persist - selectively store state in local storage
 react-dropzone - (in frontend) handles file upload and file sending to backend
+YUP - Validation library
+
