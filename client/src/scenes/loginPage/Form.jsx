@@ -1,14 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Button,
   TextField,
   useMediaQuery,
   Typography,
-  UseTheme,
+  useTheme,
 } from "@mui/material";
-import EditOffOutlinedIcon from "@mui/icons-material/EditOutlined";
-
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -16,11 +15,9 @@ import { useDispatch } from "react-redux";
 import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
-import { useTheme } from "@emotion/react";
-import { EditOffOutlined } from "@mui/icons-material";
 
 const registerSchema = yup.object().shape({
-  location: yup.string().required("required"),
+  firstName: yup.string().required("required"),
   lastName: yup.string().required("required"),
   email: yup.string().email("invalid email").required("required"),
   password: yup.string().required("required"),
@@ -35,7 +32,7 @@ const loginSchema = yup.object().shape({
 });
 
 const initialValuesRegister = {
-  location: "",
+  firstName: "",
   lastName: "",
   email: "",
   password: "",
@@ -49,45 +46,75 @@ const initialValuesLogin = {
   password: "",
 };
 
+const validateSVGViewBox = (file, callback) => {
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(event.target.result, "image/svg+xml");
+    const svgElement = svgDoc.querySelector("svg");
+    if (svgElement) {
+      const viewBox = svgElement.getAttribute("viewBox");
+      if (!viewBox || viewBox.includes("%")) {
+        // Set a default valid viewBox if not set or invalid
+        svgElement.setAttribute("viewBox", "0 0 100 100");
+        // Serialize back to string
+        const serializer = new XMLSerializer();
+        const updatedSVGContent = serializer.serializeToString(svgDoc);
+        // Create a new File object with the updated content
+        const updatedFile = new File([updatedSVGContent], file.name, {
+          type: file.type,
+          lastModified: file.lastModified,
+        });
+        callback(updatedFile);
+      } else {
+        callback(file);
+      }
+    } else {
+      callback(file);
+    }
+  };
+  reader.readAsText(file);
+};
+
 const Form = () => {
   const [pageType, setPageType] = useState("login");
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { palette } = useTheme();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const isNonMobile = useMediaQuery("(min-width:600px)");
   const isLogin = pageType === "login";
   const isRegister = pageType === "register";
-  const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
 
   const register = async (values, onSubmitProps) => {
-    //this allows us to send form info with image
-    const formData = new formData();
+    // this allows us to send form info with image
+    const formData = new FormData();
     for (let value in values) {
       formData.append(value, values[value]);
     }
     formData.append("picturePath", values.picture.name);
+
     const savedUserResponse = await fetch(
-      "https://localhost:3001/auth/register",
-      { method: "POST", body: formData }
+      "http://localhost:3001/auth/register",
+      {
+        method: "POST",
+        body: formData,
+      }
     );
     const savedUser = await savedUserResponse.json();
     onSubmitProps.resetForm();
+
     if (savedUser) {
       setPageType("login");
     }
   };
 
   const login = async (values, onSubmitProps) => {
-    const data = JSON.stringify(values);
-    const loggedUserResponse = await fetch(
-      "https://localhost:3001/auth/login",
-      {
-        method: "POST",
-        header: { "Content-type/": "application/json" },
-        body: data,
-      }
-    );
-
-    const loggedIn = await loggedUserResponse.json();
+    const loggedInResponse = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    const loggedIn = await loggedInResponse.json();
     onSubmitProps.resetForm();
     if (loggedIn) {
       dispatch(
@@ -96,17 +123,13 @@ const Form = () => {
           token: loggedIn.token,
         })
       );
+      navigate("/home");
     }
-    navigate("/home");
   };
 
-  const handleFormSubmit = async (values, onsubmitProps) => {
-    if (isLogin) {
-      await login(values, onsubmitProps);
-    }
-    if (isRegister) {
-      await register(values, onsubmitProps);
-    }
+  const handleFormSubmit = async (values, onSubmitProps) => {
+    if (isLogin) await login(values, onSubmitProps);
+    if (isRegister) await register(values, onSubmitProps);
   };
 
   return (
@@ -119,70 +142,67 @@ const Form = () => {
         values,
         errors,
         touched,
-        handleChange,
         handleBlur,
+        handleChange,
         handleSubmit,
-        resetForm,
         setFieldValue,
+        resetForm,
       }) => (
         <form onSubmit={handleSubmit}>
           <Box
             display="grid"
             gap="30px"
-            gridTemplateColumns="repeat(4,minmax(0,1fr))"
+            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
             sx={{
-              "& > div": {
-                gridColumn: isNonMobileScreens ? undefined : "span 4",
-              },
+              "& > div": { gridColumn: isNonMobile ? undefined : "span 4" },
             }}
           >
             {isRegister && (
               <>
                 <TextField
                   label="First Name"
-                  name="location"
                   onBlur={handleBlur}
-                  value={values.location}
                   onChange={handleChange}
-                  error={Boolean(touched.location) && Boolean(errors.location)}
-                  helperText={touched.location && errors.location}
+                  value={values.firstName}
+                  name="firstName"
+                  error={
+                    Boolean(touched.firstName) && Boolean(errors.firstName)
+                  }
+                  helperText={touched.firstName && errors.firstName}
                   sx={{ gridColumn: "span 2" }}
-                ></TextField>
-
+                />
                 <TextField
                   label="Last Name"
-                  name="lastName"
                   onBlur={handleBlur}
-                  value={values.lastName}
                   onChange={handleChange}
+                  value={values.lastName}
+                  name="lastName"
                   error={Boolean(touched.lastName) && Boolean(errors.lastName)}
                   helperText={touched.lastName && errors.lastName}
                   sx={{ gridColumn: "span 2" }}
-                ></TextField>
-
+                />
                 <TextField
                   label="Location"
-                  name="location"
                   onBlur={handleBlur}
-                  value={values.location}
                   onChange={handleChange}
+                  value={values.location}
+                  name="location"
                   error={Boolean(touched.location) && Boolean(errors.location)}
                   helperText={touched.location && errors.location}
                   sx={{ gridColumn: "span 4" }}
-                ></TextField>
-
+                />
                 <TextField
                   label="Occupation"
-                  name="occupation"
                   onBlur={handleBlur}
-                  value={values.occupation}
                   onChange={handleChange}
+                  value={values.occupation}
+                  name="occupation"
                   error={
                     Boolean(touched.occupation) && Boolean(errors.occupation)
                   }
                   helperText={touched.occupation && errors.occupation}
                   sx={{ gridColumn: "span 4" }}
-                ></TextField>
+                />
                 <Box
                   gridColumn="span 4"
                   border={`1px solid ${palette.neutral.medium}`}
@@ -190,26 +210,33 @@ const Form = () => {
                   p="1rem"
                 >
                   <Dropzone
-                    acceptedFiles=".jpg,.jpeg,.png"
+                    acceptedFiles=".jpg,.jpeg,.png,.svg"
                     multiple={false}
-                    onDrop={(acceptedFiles) =>
-                      setFieldValue("picture", acceptedFiles[0])
-                    }
+                    onDrop={(acceptedFiles) => {
+                      const file = acceptedFiles[0];
+                      if (file.type === "image/svg+xml") {
+                        validateSVGViewBox(file, (validatedFile) => {
+                          setFieldValue("picture", validatedFile);
+                        });
+                      } else {
+                        setFieldValue("picture", file);
+                      }
+                    }}
                   >
                     {({ getRootProps, getInputProps }) => (
                       <Box
                         {...getRootProps()}
                         border={`2px dashed ${palette.primary.main}`}
                         p="1rem"
-                        sx={{ "&hover": { cursor: "pointer" } }}
+                        sx={{ "&:hover": { cursor: "pointer" } }}
                       >
                         <input {...getInputProps()} />
                         {!values.picture ? (
-                          <p>Add picture here</p>
+                          <p>Add Picture Here</p>
                         ) : (
                           <FlexBetween>
                             <Typography>{values.picture.name}</Typography>
-                            <EditOffOutlinedIcon />
+                            <EditOutlinedIcon />
                           </FlexBetween>
                         )}
                       </Box>
@@ -221,28 +248,28 @@ const Form = () => {
 
             <TextField
               label="Email"
-              name="email"
               onBlur={handleBlur}
-              value={values.email}
               onChange={handleChange}
+              value={values.email}
+              name="email"
               error={Boolean(touched.email) && Boolean(errors.email)}
               helperText={touched.email && errors.email}
               sx={{ gridColumn: "span 4" }}
-            ></TextField>
-
+            />
             <TextField
               label="Password"
               type="password"
-              name="password"
               onBlur={handleBlur}
-              value={values.password}
               onChange={handleChange}
+              value={values.password}
+              name="password"
               error={Boolean(touched.password) && Boolean(errors.password)}
               helperText={touched.password && errors.password}
               sx={{ gridColumn: "span 4" }}
-            ></TextField>
+            />
           </Box>
-          {/* Buttons */}
+
+          {/* BUTTONS */}
           <Box>
             <Button
               fullWidth
@@ -259,17 +286,20 @@ const Form = () => {
             </Button>
             <Typography
               onClick={() => {
-                setPageType(isLogin ? "REGISTER" : "LOGIN");
+                setPageType(isLogin ? "register" : "login");
                 resetForm();
               }}
-              SX={{
+              sx={{
                 textDecoration: "underline",
                 color: palette.primary.main,
-                "&:hover": { cursor: "pointer", color: palette.primary.light },
+                "&:hover": {
+                  cursor: "pointer",
+                  color: palette.primary.light,
+                },
               }}
             >
               {isLogin
-                ? "Don't have account? Sign Up here."
+                ? "Don't have an account? Sign Up here."
                 : "Already have an account? Login here."}
             </Typography>
           </Box>
