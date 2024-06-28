@@ -7,7 +7,8 @@ import {
   Typography,
   UseTheme,
 } from "@mui/material";
-import EditOutLinedIcon from "@mui/icons-material/EditOutLined";
+import EditOffOutlinedIcon from "@mui/icons-material/EditOutlined";
+
 import { Formik } from "formik";
 import * as yup from "yup";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +17,7 @@ import { setLogin } from "state";
 import Dropzone from "react-dropzone";
 import FlexBetween from "components/FlexBetween";
 import { useTheme } from "@emotion/react";
+import { EditOffOutlined } from "@mui/icons-material";
 
 const registerSchema = yup.object().shape({
   location: yup.string().required("required"),
@@ -56,7 +58,56 @@ const Form = () => {
   const isRegister = pageType === "register";
   const isNonMobileScreens = useMediaQuery("(min-width: 600px)");
 
-  const handleFormSubmit = async (values, onsubmitProps) => {};
+  const register = async (values, onSubmitProps) => {
+    //this allows us to send form info with image
+    const formData = new formData();
+    for (let value in values) {
+      formData.append(value, values[value]);
+    }
+    formData.append("picturePath", values.picture.name);
+    const savedUserResponse = await fetch(
+      "https://localhost:3001/auth/register",
+      { method: "POST", body: formData }
+    );
+    const savedUser = await savedUserResponse.json();
+    onSubmitProps.resetForm();
+    if (savedUser) {
+      setPageType("login");
+    }
+  };
+
+  const login = async (values, onSubmitProps) => {
+    const data = JSON.stringify(values);
+    const loggedUserResponse = await fetch(
+      "https://localhost:3001/auth/login",
+      {
+        method: "POST",
+        header: { "Content-type/": "application/json" },
+        body: data,
+      }
+    );
+
+    const loggedIn = await loggedUserResponse.json();
+    onSubmitProps.resetForm();
+    if (loggedIn) {
+      dispatch(
+        setLogin({
+          user: loggedIn.user,
+          token: loggedIn.token,
+        })
+      );
+    }
+    navigate("/home");
+  };
+
+  const handleFormSubmit = async (values, onsubmitProps) => {
+    if (isLogin) {
+      await login(values, onsubmitProps);
+    }
+    if (isRegister) {
+      await register(values, onsubmitProps);
+    }
+  };
 
   return (
     <Formik
@@ -144,10 +195,83 @@ const Form = () => {
                     onDrop={(acceptedFiles) =>
                       setFieldValue("picture", acceptedFiles[0])
                     }
-                  ></Dropzone>
+                  >
+                    {({ getRootProps, getInputProps }) => (
+                      <Box
+                        {...getRootProps()}
+                        border={`2px dashed ${palette.primary.main}`}
+                        p="1rem"
+                        sx={{ "&hover": { cursor: "pointer" } }}
+                      >
+                        <input {...getInputProps()} />
+                        {!values.picture ? (
+                          <p>Add picture here</p>
+                        ) : (
+                          <FlexBetween>
+                            <Typography>{values.picture.name}</Typography>
+                            <EditOffOutlinedIcon />
+                          </FlexBetween>
+                        )}
+                      </Box>
+                    )}
+                  </Dropzone>
                 </Box>
               </>
             )}
+
+            <TextField
+              label="Email"
+              name="email"
+              onBlur={handleBlur}
+              value={values.email}
+              onChange={handleChange}
+              error={Boolean(touched.email) && Boolean(errors.email)}
+              helperText={touched.email && errors.email}
+              sx={{ gridColumn: "span 4" }}
+            ></TextField>
+
+            <TextField
+              label="Password"
+              type="password"
+              name="password"
+              onBlur={handleBlur}
+              value={values.password}
+              onChange={handleChange}
+              error={Boolean(touched.password) && Boolean(errors.password)}
+              helperText={touched.password && errors.password}
+              sx={{ gridColumn: "span 4" }}
+            ></TextField>
+          </Box>
+          {/* Buttons */}
+          <Box>
+            <Button
+              fullWidth
+              type="submit"
+              sx={{
+                m: "2rem 0",
+                p: "1rem",
+                backgroundColor: palette.primary.main,
+                color: palette.background.alt,
+                "&:hover": { color: palette.primary.main },
+              }}
+            >
+              {isLogin ? "LOGIN" : "REGISTER"}
+            </Button>
+            <Typography
+              onClick={() => {
+                setPageType(isLogin ? "REGISTER" : "LOGIN");
+                resetForm();
+              }}
+              SX={{
+                textDecoration: "underline",
+                color: palette.primary.main,
+                "&:hover": { cursor: "pointer", color: palette.primary.light },
+              }}
+            >
+              {isLogin
+                ? "Don't have account? Sign Up here."
+                : "Already have an account? Login here."}
+            </Typography>
           </Box>
         </form>
       )}
