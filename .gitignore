@@ -1,5 +1,5 @@
 server/node_modules
 server/.env
 server/public/assets
-
+server/data
 client/node_modules
