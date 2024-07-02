@@ -26,6 +26,23 @@ export const createPost = async (req, res) => {
   }
 };
 
+/* Add Comments */
+export const addComment = async (req, res) => {
+  try {
+    const { postId, comment } = req.body;
+    console.log(postId, comment);
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    post.comments.push(comment);
+    await post.save();
+    res.status(200).json(post);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 /* READ */
 export const getFeedPosts = async (req, res) => {
   try {

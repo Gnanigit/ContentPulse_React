@@ -3,8 +3,17 @@ import {
   FavoriteBorderOutlined,
   FavoriteOutlined,
   ShareOutlined,
+  SendOutlined,
 } from "@mui/icons-material";
-import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
+import {
+  Box,
+  Divider,
+  IconButton,
+  Typography,
+  useTheme,
+  InputAdornment,
+  InputBase,
+} from "@mui/material";
 import FlexBetween from "components/FlexBetween";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
@@ -22,8 +31,10 @@ const PostWidget = ({
   userPicturePath,
   likes,
   comments,
+  isProfile,
 }) => {
   const [isComments, setIsComments] = useState(false);
+  const [postComment, setPostComment] = useState("");
   const dispatch = useDispatch();
   const token = useSelector((state) => state.token);
   const loggedInUserId = useSelector((state) => state.user._id);
@@ -33,6 +44,20 @@ const PostWidget = ({
   const { palette } = useTheme();
   const main = palette.neutral.main;
   const primary = palette.primary.main;
+
+  const onSend = async () => {
+    const response = await fetch(`http://localhost:3001/posts/addcomment`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ postId, comment: postComment }),
+    });
+    const updatedPost = await response.json();
+    dispatch(setPost({ post: updatedPost }));
+    setPostComment("");
+  };
 
   const patchLike = async () => {
     const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
@@ -54,6 +79,7 @@ const PostWidget = ({
         name={name}
         subtitle={location}
         userPicturePath={userPicturePath}
+        isProfile={isProfile}
       />
       <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
@@ -92,19 +118,43 @@ const PostWidget = ({
           <ShareOutlined />
         </IconButton>
       </FlexBetween>
-      {isComments && (
-        <Box mt="0.5rem">
-          {comments.map((comment, i) => (
-            <Box key={`${name}-${i}`}>
-              <Divider />
-              <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
-                {comment}
-              </Typography>
-            </Box>
-          ))}
-          <Divider />
-        </Box>
-      )}
+      <FlexBetween>
+        {isComments && (
+          <InputBase
+            placeholder="Add comment..."
+            onChange={(e) => setPostComment(e.target.value)}
+            value={postComment}
+            sx={{
+              width: "100%",
+              backgroundColor: palette.neutral.light,
+              borderRadius: "2rem",
+              padding: "1rem 0.5rem 1rem 1.5rem",
+            }}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton color="primary" aria-label="send comment">
+                  <SendOutlined onClick={onSend} />
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+        )}
+      </FlexBetween>
+      <FlexBetween>
+        {isComments && (
+          <Box mt="0.5rem" sx={{ width: "100%" }}>
+            {comments.map((comment, i) => (
+              <Box key={`${name}-${i}`} sx={{ width: "100%" }}>
+                <Divider sx={{ width: "100%" }} />
+                <Typography sx={{ color: main, m: "0.5rem 0", pl: "1rem" }}>
+                  {comment}
+                </Typography>
+              </Box>
+            ))}
+            <Divider />
+          </Box>
+        )}
+      </FlexBetween>
     </WidgetWrapper>
   );
 };

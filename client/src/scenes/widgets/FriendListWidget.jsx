@@ -5,13 +5,12 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setFriends } from "state";
 
-const FriendListWidget = ({ userId }) => {
+const FriendListWidget = ({ userId, isProfile = false }) => {
   const dispatch = useDispatch();
   const { palette } = useTheme();
-  const { _id } = useSelector((state) => state.user);
+  // const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const friends = useSelector((state) => state.user.friends);
-
   const getFriends = async () => {
     const response = await fetch(
       `http://localhost:3001/users/${userId}/friends`,
@@ -39,11 +38,13 @@ const FriendListWidget = ({ userId }) => {
       <Box display="flex" flexDirection="column" gap="1.5rem">
         {friends.map((friend) => (
           <Friend
+            userId={userId}
             key={friend._id}
             friendId={friend._id}
             name={`${friend.firstName} ${friend.lastName}`}
             subtitle={friend.occupation}
             userPicturePath={friend.picturePath}
+            isProfile={isProfile}
           />
         ))}
       </Box>
