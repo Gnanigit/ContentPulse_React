@@ -176,7 +176,6 @@ const Form = ({
   const handleFormSubmit = async (values, onSubmitProps) => {
     console.log(isProfile);
     if (isProfile) {
-      console.log("hello");
       await update(values, onSubmitProps);
     } else if (isLogin) {
       await login(values, onSubmitProps);
