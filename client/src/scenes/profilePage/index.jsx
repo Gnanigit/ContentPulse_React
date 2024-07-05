@@ -7,14 +7,56 @@ import FriendListWidget from "scenes/widgets/FriendListWidget";
 import MyPostWidget from "scenes/widgets/MyPostWidget";
 import PostsWidget from "scenes/widgets/PostsWidget";
 import UserWidget from "scenes/widgets/UserWidget";
+import Form from "scenes/loginPage/Form";
+import WidgetWrapper from "components/WidgetWrapper";
 
 const ProfilePage = () => {
+  const initialVal = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    location: "",
+    occupation: "",
+    picture: "",
+  };
   const [user, setUser] = useState(null);
+  const [initialValues, setInitialValues] = useState(initialVal);
   const { userId } = useParams();
   const loggedInUser = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const [showPosts, setShowPosts] = useState(true);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`http://localhost:3001/users/${userId}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const userData = await response.json();
+
+        setInitialValues({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          password: "",
+          location: userData.location,
+          occupation: userData.occupation,
+          picture: userData.picturePath,
+        });
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const switchComponent = () => {
+    setShowPosts((prevState) => !prevState);
+  };
   const getUser = async () => {
     const response = await fetch(`http://localhost:3001/users/${userId}`, {
       method: "GET",
@@ -41,7 +83,11 @@ const ProfilePage = () => {
         justifyContent="center"
       >
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <UserWidget userId={userId} picturePath={user.picturePath} />
+          <UserWidget
+            userId={userId}
+            picturePath={user.picturePath}
+            switchComponent={switchComponent}
+          />
           <Box m="2rem 0" />
           <FriendListWidget userId={userId} isProfile />
         </Box>
@@ -49,14 +95,21 @@ const ProfilePage = () => {
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          {loggedInUser._id === userId && (
+          {showPosts ? (
             <>
-              <MyPostWidget picturePath={user.picturePath} />
-              <Box m="2rem 0" />
+              {loggedInUser._id === userId && (
+                <>
+                  <MyPostWidget picturePath={user.picturePath} />
+                  <Box m="2rem 0" />
+                </>
+              )}
+              <PostsWidget userId={userId} isProfile />
             </>
+          ) : (
+            <WidgetWrapper>
+              <Form isProfile={true} val={initialValues} />
+            </WidgetWrapper>
           )}
-
-          <PostsWidget userId={userId} isProfile />
         </Box>
       </Box>
     </Box>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -10,6 +11,7 @@ import {
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { Formik } from "formik";
 import * as yup from "yup";
+
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLogin } from "state";
@@ -76,14 +78,36 @@ const validateSVGViewBox = (file, callback) => {
   reader.readAsText(file);
 };
 
-const Form = () => {
+const Form = ({
+  isProfile = false,
+  val = {
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    location: "",
+    occupation: "",
+    picture: "",
+  },
+}) => {
+  const initialValues = {
+    firstName: val.firstName,
+    lastName: val.lastName,
+    email: val.email,
+    password: "",
+    location: val.location,
+    occupation: val.occupation,
+    picture: val.picturePath,
+  };
   const [pageType, setPageType] = useState("login");
+
   const { palette } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const isNonMobile = useMediaQuery("(min-width:600px)");
-  const isLogin = pageType === "login";
-  const isRegister = pageType === "register";
+  const isLogin = pageType === "login" && !isProfile;
+  const isRegister = pageType === "register" || isProfile;
 
   const register = async (values, onSubmitProps) => {
     // this allows us to send form info with image
@@ -92,7 +116,7 @@ const Form = () => {
       formData.append(value, values[value]);
     }
     formData.append("picturePath", values.picture.name);
-    console.log(formData);
+
     const savedUserResponse = await fetch(
       "http://localhost:3001/auth/register",
       {
@@ -127,15 +151,50 @@ const Form = () => {
     }
   };
 
+  const update = async (values, onSubmitProps) => {
+    console.log("hello");
+    // this allows us to send form info with image
+    // const formData = new FormData();
+    // for (let value in values) {
+    //   formData.append(value, values[value]);
+    // }
+    // formData.append("picturePath", values.picture.name);
+    // const savedUserResponse = await fetch(
+    //   "http://localhost:3001/auth/register",
+    //   {
+    //     method: "POST",
+    //     body: formData,
+    //   }
+    // );
+    // const savedUser = await savedUserResponse.json();
+    // onSubmitProps.resetForm();
+    // if (savedUser) {
+    //   setPageType("login");
+    // }
+  };
+
   const handleFormSubmit = async (values, onSubmitProps) => {
-    if (isLogin) await login(values, onSubmitProps);
-    if (isRegister) await register(values, onSubmitProps);
+    console.log(isProfile);
+    if (isProfile) {
+      console.log("hello");
+      await update(values, onSubmitProps);
+    } else if (isLogin) {
+      await login(values, onSubmitProps);
+    } else if (isRegister) {
+      await register(values, onSubmitProps);
+    }
   };
 
   return (
     <Formik
       onSubmit={handleFormSubmit}
-      initialValues={isLogin ? initialValuesLogin : initialValuesRegister}
+      initialValues={
+        isProfile
+          ? initialValues
+          : isLogin
+          ? initialValuesLogin
+          : initialValuesRegister
+      }
       validationSchema={isLogin ? loginSchema : registerSchema}
     >
       {({
@@ -149,6 +208,17 @@ const Form = () => {
         resetForm,
       }) => (
         <form onSubmit={handleSubmit}>
+          {isProfile && (
+            <Typography
+              textAlign="center"
+              fontWeight="bold"
+              fontSize="25px"
+              color="primary"
+              mb="1.5rem"
+            >
+              Update Profile
+            </Typography>
+          )}
           <Box
             display="grid"
             gap="30px"
@@ -282,7 +352,7 @@ const Form = () => {
                 "&:hover": { color: palette.primary.main },
               }}
             >
-              {isLogin ? "LOGIN" : "REGISTER"}
+              {isProfile ? "UPDATE" : isLogin ? "LOGIN" : "REGISTER"}
             </Button>
             <Typography
               onClick={() => {
@@ -298,9 +368,10 @@ const Form = () => {
                 },
               }}
             >
-              {isLogin
-                ? "Don't have an account? Sign Up here."
-                : "Already have an account? Login here."}
+              {!isProfile &&
+                (isLogin
+                  ? "Don't have an account? Sign Up here."
+                  : "Already have an account? Login here.")}
             </Typography>
           </Box>
         </form>
