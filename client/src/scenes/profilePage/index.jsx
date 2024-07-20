@@ -7,8 +7,8 @@ import FriendListWidget from "scenes/widgets/FriendListWidget";
 import MyPostWidget from "scenes/widgets/MyPostWidget";
 import PostsWidget from "scenes/widgets/PostsWidget";
 import UserWidget from "scenes/widgets/UserWidget";
-import Form from "scenes/loginPage/Form";
 import WidgetWrapper from "components/WidgetWrapper";
+import UpdateProfile from "components/UpdateProfile";
 
 const ProfilePage = () => {
   const initialVal = {
@@ -107,7 +107,7 @@ const ProfilePage = () => {
             </>
           ) : (
             <WidgetWrapper>
-              <Form isProfile={true} val={initialValues} />
+              <UpdateProfile val={initialValues} />
             </WidgetWrapper>
           )}
         </Box>
