@@ -1,4 +1,6 @@
 import User from "../models/User.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 /* READ */
 export const getUser = async (req, res) => {
@@ -58,6 +60,79 @@ export const addRemoveFriend = async (req, res) => {
     );
 
     res.status(200).json(formattedFriends);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const updateGeneralDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userValues = req.body;
+    const filteredValues = Object.fromEntries(
+      Object.entries(userValues).filter(
+        ([key, value]) => value !== "" && key !== "email"
+      )
+    );
+    const user = await User.findByIdAndUpdate({ _id: id }, filteredValues, {
+      new: true,
+    }).lean();
+    delete user.password;
+    const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
+    res.status(200).json({ token, user });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const oldPassword = req.body.oldPassword;
+    const newPassword = req.body.newPassword;
+    const user = await User.findById(id);
+    if (!user) {
+      return res
+        .status(500)
+        .json({ field: "oldPassword", message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isMatch) {
+      return res
+        .status(500)
+        .json({ field: "oldPassword", message: "Incorrect old password" });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    await user.save();
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const userWithoutPassword = user.toObject();
+    delete userWithoutPassword.password;
+    res.status(200).json({ token, user: userWithoutPassword });
+  } catch (err) {
+    res.status(500).json({ field: "oldPassword", message: err.message });
+  }
+};
+
+export const updateProfilePicture = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const picturePath = req.body.picture.path;
+    console.log(picturePath);
+    const user = await User.findByIdAndUpdate(
+      { _id: id },
+      { picturePath },
+      {
+        new: true,
+      }
+    ).lean();
+    delete user.password;
+    const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
+    console.log(user);
+    res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
