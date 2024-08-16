@@ -32,7 +32,7 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 const corsOptions = {
-  origin: ["", "http://localhost:3000"],
+  origin: ["https://content-pulse-react.vercel.app", "http://localhost:3000"],
   credentials: true,
 };
 app.use(cors(corsOptions));
