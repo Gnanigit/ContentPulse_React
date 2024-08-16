@@ -13,6 +13,7 @@ import FlexBetween from "./FlexBetween";
 import { useSelector } from "react-redux";
 import Dropzone from "react-dropzone";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 const validateSVGViewBox = (file, callback) => {
   const reader = new FileReader();
@@ -86,17 +87,14 @@ const UpdateProfile = ({ val }) => {
 
   const updateGD = async (values, onSubmitProps) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/users/${_id}/updategd`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/users/${_id}/updategd`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
       onSubmitProps.resetForm();
 
       setChangeGeneralDetails(false);
@@ -108,17 +106,14 @@ const UpdateProfile = ({ val }) => {
 
   const updatePass = async (values, setErrors, onSubmitProps) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/users/${_id}/updatepass`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/users/${_id}/updatepass`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
       const result = await response.json();
       if (!response.ok) {
@@ -135,17 +130,14 @@ const UpdateProfile = ({ val }) => {
 
   const updatePic = async (values, onSubmitProps) => {
     try {
-      const response = await fetch(
-        `http://localhost:3001/users/${_id}/updatepic`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/users/${_id}/updatepic`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
 
       const result = await response.json();
       if (!response.ok) {

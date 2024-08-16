@@ -20,6 +20,7 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "state";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 const PostWidget = ({
   postId,
@@ -46,7 +47,7 @@ const PostWidget = ({
   const primary = palette.primary.main;
 
   const onSend = async () => {
-    const response = await fetch(`http://localhost:3001/posts/addcomment`, {
+    const response = await fetch(`${BASE_URL}/posts/addcomment`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -60,7 +61,7 @@ const PostWidget = ({
   };
 
   const patchLike = async () => {
-    const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
+    const response = await fetch(`${BASE_URL}/posts/${postId}/like`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,

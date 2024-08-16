@@ -9,6 +9,7 @@ import PostsWidget from "scenes/widgets/PostsWidget";
 import UserWidget from "scenes/widgets/UserWidget";
 import WidgetWrapper from "components/WidgetWrapper";
 import UpdateProfile from "components/UpdateProfile";
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 const ProfilePage = () => {
   const initialVal = {
@@ -31,7 +32,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch(`http://localhost:3001/users/${userId}`, {
+        const response = await fetch(`${BASE_URL}/users/${userId}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -58,7 +59,7 @@ const ProfilePage = () => {
     setShowPosts((prevState) => !prevState);
   };
   const getUser = async () => {
-    const response = await fetch(`http://localhost:3001/users/${userId}`, {
+    const response = await fetch(`${BASE_URL}/users/${userId}`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
