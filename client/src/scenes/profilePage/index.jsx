@@ -9,6 +9,7 @@ import PostsWidget from "scenes/widgets/PostsWidget";
 import UserWidget from "scenes/widgets/UserWidget";
 import WidgetWrapper from "components/WidgetWrapper";
 import UpdateProfile from "components/UpdateProfile";
+import Footer from "components/Footer";
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const ProfilePage = () => {
@@ -113,6 +114,7 @@ const ProfilePage = () => {
           )}
         </Box>
       </Box>
+      <Footer />
     </Box>
   );
 };
