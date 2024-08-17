@@ -1,3 +1,4 @@
+import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material";
 
 const Footer = () => {
@@ -6,9 +7,18 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Typography color={main} sx={{ mt: "1rem" }}>
-      © {currentYear} Gnani. All rights reserved.
-    </Typography>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        mt: "1rem",
+      }}
+    >
+      <Typography color={main}>
+        © {currentYear} Gnani. All rights reserved.
+      </Typography>
+    </Box>
   );
 };
 
