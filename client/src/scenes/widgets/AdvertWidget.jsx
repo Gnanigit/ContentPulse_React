@@ -34,7 +34,7 @@ const adData = [
       "Experience the ultimate in comfort and performance with Adidas – gear up for greatness.",
   },
   {
-    picture: `${BASE_URL}/assets/CocaColaadvert.png`,
+    picture: `${BASE_URL}/assets/CocaColaAdvert.png`,
     name: "COCA-COLA",
     website: "coca-cola.com",
     description:
