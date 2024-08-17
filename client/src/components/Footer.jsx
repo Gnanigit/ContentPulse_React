@@ -12,7 +12,7 @@ const Footer = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        mb: "0.2rem",
+        mb: "0.8rem",
       }}
     >
       <Typography color={main}>
