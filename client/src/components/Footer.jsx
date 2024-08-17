@@ -1,10 +1,15 @@
-import { Box } from "@mui/material";
-import { styled } from "@mui/system";
+import { useTheme } from "@mui/material";
 
 const Footer = () => {
+  const { palette } = useTheme();
+  const main = palette.neutral.main;
   const currentYear = new Date().getFullYear();
 
-  return <p>© {currentYear} Gnani. All rights reserved.</p>;
+  return (
+    <Typography color={main} sx={{ mt: "1rem" }}>
+      © {currentYear} Gnani. All rights reserved.
+    </Typography>
+  );
 };
 
 export default Footer;
