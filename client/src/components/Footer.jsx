@@ -14,7 +14,7 @@ const Footer = () => {
         alignItems: "center",
       }}
     >
-      <Typography mt="0" color={main}>
+      <Typography color={main}>
         © {currentYear} Gnani. All rights reserved.
       </Typography>
     </Box>
