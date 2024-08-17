@@ -6,7 +6,7 @@ const BASE_URL = process.env.REACT_APP_API_URL;
 
 const adData = [
   {
-    picture: `${BASE_URL}/assets/T20WorldCupAdvert.png"=`,
+    picture: `${BASE_URL}/assets/T20WorldCupAdvert.png`,
     name: "ICC T20 WORLD CUP",
     website: "t20worldcup.com",
     description:
