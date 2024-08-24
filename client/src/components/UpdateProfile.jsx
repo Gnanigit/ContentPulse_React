@@ -129,7 +129,19 @@ const UpdateProfile = ({ val }) => {
   };
 
   const updatePic = async (values, onSubmitProps) => {
+    const getBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
     try {
+      const base64Picture = await getBase64(values.picture);
+      values.picture = base64Picture;
+
       const response = await fetch(`${BASE_URL}/users/${_id}/updatepic`, {
         method: "POST",
         headers: {

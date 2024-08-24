@@ -72,18 +72,29 @@ const MyPostWidget = ({ picturePath }) => {
   };
 
   const handlePost = async () => {
-    const formData = new FormData();
-    formData.append("userId", _id);
-    formData.append("description", post);
+    const getBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
+    const formData = { userId: _id, description: post };
+
     if (image) {
-      formData.append("picture", image);
-      formData.append("picturePath", image.name);
+      const base64Picture = await getBase64(image);
+      formData.picturePath = base64Picture;
     }
 
     const response = await fetch(`${BASE_URL}/posts`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
     });
     const posts = await response.json();
     dispatch(setPosts({ posts }));

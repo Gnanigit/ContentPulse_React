@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Box, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import Navbar from "scenes/navBar";
@@ -7,14 +8,19 @@ import PostsWidget from "scenes/widgets/PostsWidget";
 import AdvertWidget from "scenes/widgets/AdvertWidget";
 import FriendListWidget from "scenes/widgets/FriendListWidget";
 import Footer from "components/Footer";
+import NotFriendListWidget from "scenes/widgets/NotFriendList";
 
 const HomePage = () => {
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
   const { _id, picturePath } = useSelector((state) => state.user);
+  const [showPosts, setShowPosts] = useState(true);
 
+  const handleTogglePosts = () => {
+    setShowPosts((prevShowPosts) => !prevShowPosts);
+  };
   return (
     <Box>
-      <Navbar />
+      <Navbar onTogglePosts={handleTogglePosts} />
       <Box
         width="100%"
         padding="2rem 6%"
@@ -30,7 +36,15 @@ const HomePage = () => {
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
           <MyPostWidget picturePath={picturePath} />
-          <PostsWidget userId={_id} />
+          {showPosts ? (
+            <PostsWidget userId={_id} />
+          ) : (
+            <Box flexBasis="26%">
+              <Box m="2rem 0" />
+              <NotFriendListWidget userId={_id} />
+              {/* friends widget */}
+            </Box>
+          )}
         </Box>
         {isNonMobileScreens && (
           <Box flexBasis="26%">

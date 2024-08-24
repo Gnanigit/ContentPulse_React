@@ -32,6 +32,40 @@ export const getUserFriends = async (req, res) => {
   }
 };
 
+export const getUserNotFriends = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Fetch the current user by ID
+    const user = await User.findById(id);
+
+    // Get the list of friend IDs
+    const friendIds = user.friends;
+
+    // Find all users who are not in the user's friends list
+    const notFriends = await User.find({
+      _id: { $nin: [...friendIds, user._id] }, // Exclude friends and the current user
+    });
+
+    // Format the response
+    const formattedNotFriends = notFriends.map(
+      ({ _id, firstName, lastName, occupation, location, picturePath }) => ({
+        _id,
+        firstName,
+        lastName,
+        occupation,
+        location,
+        picturePath,
+      })
+    );
+
+    // Send the response
+    res.status(200).json(formattedNotFriends);
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+};
+
 /* UPDATE */
 export const addRemoveFriend = async (req, res) => {
   try {
@@ -120,8 +154,7 @@ export const updatePassword = async (req, res) => {
 export const updateProfilePicture = async (req, res) => {
   try {
     const { id } = req.params;
-    const picturePath = req.body.picture.path;
-    console.log(picturePath);
+    const picturePath = req.body.picture;
     const user = await User.findByIdAndUpdate(
       { _id: id },
       { picturePath },
@@ -131,7 +164,7 @@ export const updateProfilePicture = async (req, res) => {
     ).lean();
     delete user.password;
     const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
-    console.log(user);
+
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });

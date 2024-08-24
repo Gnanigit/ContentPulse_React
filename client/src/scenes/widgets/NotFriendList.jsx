@@ -1,28 +1,27 @@
 import { Box, Typography, useTheme } from "@mui/material";
 import Friend from "components/Friend";
 import WidgetWrapper from "components/WidgetWrapper";
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setFriends } from "state";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 const BASE_URL = process.env.REACT_APP_API_URL;
 
-const FriendListWidget = ({ userId, isProfile = false }) => {
-  const dispatch = useDispatch();
+const NotFriendListWidget = ({ userId, isProfile = false }) => {
+  const [notFriends, setNotFriends] = useState([]);
   const { palette } = useTheme();
-  // const { _id } = useSelector((state) => state.user);
+
   const token = useSelector((state) => state.token);
   const friends = useSelector((state) => state.user.friends);
 
-  const getFriends = async () => {
-    const response = await fetch(`${BASE_URL}/users/${userId}/friends`, {
+  const getNotFriends = async () => {
+    const response = await fetch(`${BASE_URL}/users/${userId}/notfriends`, {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await response.json();
-    dispatch(setFriends({ friends: data }));
+    setNotFriends(data);
   };
   useEffect(() => {
-    getFriends();
+    getNotFriends();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
@@ -33,17 +32,17 @@ const FriendListWidget = ({ userId, isProfile = false }) => {
         fontWeight="500"
         sx={{ mb: "1.5rem" }}
       >
-        Friends List
+        Make more friends
       </Typography>
       <Box display="flex" flexDirection="column" gap="1.5rem">
-        {friends.map((friend) => (
+        {notFriends.map((notFriend) => (
           <Friend
-            key={friend._id}
+            key={notFriend._id}
             userId={userId}
-            friendId={friend._id}
-            name={`${friend.firstName} ${friend.lastName}`}
-            subtitle={friend.occupation}
-            userPicturePath={friend.picturePath}
+            friendId={notFriend._id}
+            name={`${notFriend.firstName} ${notFriend.lastName}`}
+            subtitle={notFriend.occupation}
+            userPicturePath={notFriend.picturePath}
             isProfile={isProfile}
           />
         ))}
@@ -51,4 +50,4 @@ const FriendListWidget = ({ userId, isProfile = false }) => {
     </WidgetWrapper>
   );
 };
-export default FriendListWidget;
+export default NotFriendListWidget;

@@ -91,16 +91,25 @@ const Form = () => {
   const isRegister = pageType === "register";
 
   const register = async (values, onSubmitProps) => {
-    const formData = new FormData();
-    for (let value in values) {
-      formData.append(value, values[value]);
-    }
-    formData.append("picturePath", values.picture.name);
+    const getBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    };
 
     try {
+      const base64Picture = await getBase64(values.picture);
+      console.log(base64Picture);
+      delete values.picture;
+      const formData = { ...values, picturePath: base64Picture };
+
       const savedUserResponse = await fetch(`${BASE_URL}/auth/register`, {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
       const savedUser = await savedUserResponse.json();
       onSubmitProps.resetForm();

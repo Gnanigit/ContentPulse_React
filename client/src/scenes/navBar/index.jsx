@@ -9,6 +9,7 @@ import {
   FormControl,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from "@mui/material";
 import {
   Search,
@@ -19,13 +20,14 @@ import {
   Help,
   Menu,
   Close,
+  PersonAdd,
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { setMode, setLogout } from "state";
 import { useNavigate } from "react-router-dom";
 import FlexBetween from "components/FlexBetween";
 
-const Navbar = () => {
+const Navbar = ({ onTogglePosts }) => {
   const [isMobileMenuToggled, setIsMobileMenuToggled] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -86,6 +88,12 @@ const Navbar = () => {
           <Message sx={{ fontSize: "25px" }} />
           <Notifications sx={{ fontSize: "25px" }} />
           <Help sx={{ fontSize: "25px" }} />
+          <Tooltip title="Connect with more friends" arrow>
+            <PersonAdd
+              sx={{ fontSize: "25px", cursor: "pointer" }}
+              onClick={onTogglePosts}
+            />
+          </Tooltip>
           <FormControl variant="standard" value={fullName}>
             <Select
               value={fullName}
