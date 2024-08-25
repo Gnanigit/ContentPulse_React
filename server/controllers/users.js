@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Post from "../models/Post.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
@@ -36,10 +37,8 @@ export const getUserNotFriends = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Fetch the current user by ID
     const user = await User.findById(id);
 
-    // Get the list of friend IDs
     const friendIds = user.friends;
 
     // Find all users who are not in the user's friends list
@@ -47,7 +46,6 @@ export const getUserNotFriends = async (req, res) => {
       _id: { $nin: [...friendIds, user._id] }, // Exclude friends and the current user
     });
 
-    // Format the response
     const formattedNotFriends = notFriends.map(
       ({ _id, firstName, lastName, occupation, location, picturePath }) => ({
         _id,
@@ -59,7 +57,6 @@ export const getUserNotFriends = async (req, res) => {
       })
     );
 
-    // Send the response
     res.status(200).json(formattedNotFriends);
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -168,5 +165,29 @@ export const updateProfilePicture = async (req, res) => {
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });
+  }
+};
+
+export const deleteUserAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Remove this user's ID from their friends' friends array
+    for (let friendId of user.friends) {
+      await User.findByIdAndUpdate(friendId, {
+        $pull: { friends: id },
+      });
+    }
+    await Post.deleteMany({ userId: id });
+    const userDeleted = await User.findByIdAndDelete(id);
+    if (!userDeleted) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "User account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting user account", error });
   }
 };

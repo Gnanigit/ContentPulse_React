@@ -7,6 +7,7 @@ import {
   updatePassword,
   updateProfilePicture,
   getUserNotFriends,
+  deleteUserAccount, // Import the delete function
 } from "../controllers/users.js";
 
 import { verifyToken } from "../middleware/auth.js";
@@ -23,5 +24,8 @@ router.patch("/:id/:friendId", verifyToken, addRemoveFriend);
 router.post("/:id/updategd", updateGeneralDetails);
 router.post("/:id/updatepass", updatePassword);
 router.post("/:id/updatepic", updateProfilePicture);
+
+/* DELETE */
+router.delete("/:id/deleteaccount", verifyToken, deleteUserAccount);
 
 export default router;

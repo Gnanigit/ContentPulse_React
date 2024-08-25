@@ -40,7 +40,7 @@ const PostsWidget = ({ userId, isProfile = false }) => {
   return (
     <>
       {posts.length === 0 ? (
-        <Box display="flex" justifyContent="center">
+        <Box display="flex" justifyContent="center" mt="1.4rem">
           <Typography
             fontSize="clamp(0.5rem, 1.4rem, 1.5rem)"
             color="primary"

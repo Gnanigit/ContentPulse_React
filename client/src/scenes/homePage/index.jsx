@@ -18,11 +18,18 @@ const HomePage = () => {
   const handleTogglePosts = () => {
     setShowPosts((prevShowPosts) => !prevShowPosts);
   };
+
   return (
-    <Box>
+    <Box
+      display="flex"
+      flexDirection="column"
+      minHeight="100vh"
+      paddingBottom="1.5rem"
+    >
       <Navbar onTogglePosts={handleTogglePosts} />
       <Box
         width="100%"
+        flex="1"
         padding="2rem 6%"
         display={isNonMobileScreens ? "flex" : "block"}
         gap="0.5rem"
@@ -42,7 +49,6 @@ const HomePage = () => {
             <Box flexBasis="26%">
               <Box m="2rem 0" />
               <NotFriendListWidget userId={_id} />
-              {/* friends widget */}
             </Box>
           )}
         </Box>
@@ -51,11 +57,10 @@ const HomePage = () => {
             <AdvertWidget />
             <Box m="2rem 0" />
             <FriendListWidget userId={_id} />
-            {/* friends widget */}
           </Box>
         )}
       </Box>
-      <Footer />
+      <Footer mt="auto" />
     </Box>
   );
 };

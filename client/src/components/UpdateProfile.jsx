@@ -10,9 +10,12 @@ import {
 import { Formik } from "formik";
 import WidgetWrapper from "./WidgetWrapper";
 import FlexBetween from "./FlexBetween";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setLogout } from "state";
+import { updateUser } from "state";
 import Dropzone from "react-dropzone";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import { useNavigate } from "react-router-dom";
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const validateSVGViewBox = (file, callback) => {
@@ -47,12 +50,18 @@ const validateSVGViewBox = (file, callback) => {
 
 const UpdateProfile = ({ val }) => {
   const theme = useTheme();
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const dark = theme.palette.neutral.dark;
   const { _id } = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+
   const [changeGeneralDetails, setChangeGeneralDetails] = useState(false);
   const [changePassword, setChangePassword] = useState(false);
   const [changeProfilePic, setChangeProfilePic] = useState(false);
+  const [deleteAccount, setDeleteAccount] = useState(false);
+
   const [error, setError] = useState("");
 
   const GeneralValues = {
@@ -95,8 +104,11 @@ const UpdateProfile = ({ val }) => {
         },
         body: JSON.stringify(values),
       });
-      onSubmitProps.resetForm();
 
+      const updatedUserData = await response.json();
+      dispatch(updateUser(updatedUserData));
+
+      onSubmitProps.resetForm();
       setChangeGeneralDetails(false);
       window.location.reload();
     } catch (error) {
@@ -141,7 +153,7 @@ const UpdateProfile = ({ val }) => {
     try {
       const base64Picture = await getBase64(values.picture);
       values.picture = base64Picture;
-
+      console.log(values.picture);
       const response = await fetch(`${BASE_URL}/users/${_id}/updatepic`, {
         method: "POST",
         headers: {
@@ -165,13 +177,39 @@ const UpdateProfile = ({ val }) => {
     }
   };
 
+  const deleteUserAccount = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/users/${_id}/deleteaccount`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        // Handle errors
+        throw new Error(`Failed to delete account: ${response.statusText}`);
+      } else {
+        const data = await response.json();
+        console.log("User account deleted successfully:", data);
+        dispatch(setLogout());
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error deleting user account:", error);
+    }
+  };
+
   const handleFormSubmit = async (values, { setErrors, resetForm }) => {
     if (changeGeneralDetails) {
       await updateGD(values, { resetForm });
     } else if (changeProfilePic) {
       await updatePic(values, { resetForm });
-    } else {
+    } else if (changePassword) {
       await updatePass(values, setErrors, { resetForm });
+    } else {
+      await deleteUserAccount();
     }
     resetForm();
   };
@@ -230,6 +268,7 @@ const UpdateProfile = ({ val }) => {
                 <Button
                   onClick={() => {
                     setChangeGeneralDetails(!changeGeneralDetails);
+                    setDeleteAccount(false);
                     setChangeProfilePic(false);
                     setChangePassword(false);
                   }}
@@ -314,6 +353,7 @@ const UpdateProfile = ({ val }) => {
                 <Button
                   onClick={() => {
                     setChangeProfilePic(!changeProfilePic);
+                    setDeleteAccount(false);
                     setChangePassword(false);
                     setChangeGeneralDetails(false);
                   }}
@@ -404,6 +444,7 @@ const UpdateProfile = ({ val }) => {
                 <Button
                   onClick={() => {
                     setChangePassword(!changePassword);
+                    setDeleteAccount(false);
                     setChangeGeneralDetails(false);
                     setChangeProfilePic(false);
                   }}
@@ -460,6 +501,79 @@ const UpdateProfile = ({ val }) => {
                       }}
                     >
                       Update
+                    </Button>
+                  </Box>
+                </WidgetWrapper>
+              )}
+            </Box>
+            <Divider />
+            <Box p="1rem 0">
+              <FlexBetween gap="1rem">
+                <Typography
+                  variant="h5"
+                  color={dark}
+                  fontWeight="400"
+                  sx={{
+                    "&:hover": {
+                      cursor: "pointer",
+                    },
+                  }}
+                >
+                  Delete Account
+                </Typography>
+                <Button
+                  onClick={() => {
+                    setDeleteAccount(!deleteAccount);
+                    setChangePassword(false);
+                    setChangeGeneralDetails(false);
+                    setChangeProfilePic(false);
+                  }}
+                  sx={{
+                    color: theme.palette.background.alt,
+                    backgroundColor: theme.palette.primary.main,
+                    borderRadius: "3rem",
+                  }}
+                >
+                  Get
+                </Button>
+              </FlexBetween>
+              {deleteAccount && (
+                <WidgetWrapper>
+                  {errors && (
+                    <Typography color="error" variant="body2" pb="0.8rem">
+                      {error}
+                    </Typography>
+                  )}
+                  <Box display="grid" gap="30px">
+                    <Typography
+                      variant="h5"
+                      color={dark}
+                      fontWeight="400"
+                      sx={{
+                        color: "rgba(255, 0, 0, 0.7)",
+
+                        "&:hover": {
+                          cursor: "pointer",
+                        },
+                      }}
+                    >
+                      Are you sure you want to delete your account? This action
+                      is irreversible and will remove all your data permanently.
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Button
+                      fullWidth
+                      type="submit"
+                      sx={{
+                        m: "2rem 0",
+                        p: "1rem",
+                        backgroundColor: theme.palette.primary.main,
+                        color: theme.palette.background.alt,
+                        "&:hover": { color: theme.palette.primary.main },
+                      }}
+                    >
+                      Delete Account
                     </Button>
                   </Box>
                 </WidgetWrapper>

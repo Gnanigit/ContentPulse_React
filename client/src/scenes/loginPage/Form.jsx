@@ -102,7 +102,7 @@ const Form = () => {
 
     try {
       const base64Picture = await getBase64(values.picture);
-      console.log(base64Picture);
+
       delete values.picture;
       const formData = { ...values, picturePath: base64Picture };
 
@@ -256,6 +256,7 @@ const Form = () => {
                     <Dropzone
                       acceptedFiles=".jpg,.jpeg,.png,.svg"
                       multiple={false}
+                      maxSize={100 * 1024 * 1024}
                       onDrop={(acceptedFiles) => {
                         const file = acceptedFiles[0];
                         if (file.type === "image/svg+xml") {

@@ -26,10 +26,8 @@ app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-app.use(bodyParser.json({ limit: "100mb", extended: true }));
-app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
-app.use(express.json({ limit: "100mb" }));
-app.use(express.urlencoded({ limit: "100mb", extended: true }));
+app.use(bodyParser.json({ limit: "900mb", extended: true }));
+app.use(bodyParser.urlencoded({ limit: "900mb", extended: true }));
 
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
@@ -40,12 +38,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-/* ROUTES WITH FILES */
-app.post("/auth/register", register);
-
-app.post("/posts", verifyToken, createPost);
-
 /* ROUTES */
+app.post("/auth/register", register);
+app.post("/posts", verifyToken, createPost);
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/posts", postRoutes);

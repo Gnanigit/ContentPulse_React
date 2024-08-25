@@ -10,6 +10,7 @@ import UserWidget from "scenes/widgets/UserWidget";
 import WidgetWrapper from "components/WidgetWrapper";
 import UpdateProfile from "components/UpdateProfile";
 import Footer from "components/Footer";
+import NotFriendListWidget from "scenes/widgets/NotFriendList";
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const ProfilePage = () => {
@@ -28,6 +29,7 @@ const ProfilePage = () => {
   const loggedInUser = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const isNonMobileScreens = useMediaQuery("(min-width:1000px)");
+  const [showMyPosts, setShowMyPosts] = useState(true);
   const [showPosts, setShowPosts] = useState(true);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ const ProfilePage = () => {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const switchComponent = () => {
-    setShowPosts((prevState) => !prevState);
+    setShowMyPosts((prevState) => !prevState);
   };
   const getUser = async () => {
     const response = await fetch(`${BASE_URL}/users/${userId}`, {
@@ -72,11 +74,24 @@ const ProfilePage = () => {
     getUser();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleTogglePosts = () => {
+    setShowPosts((prevShowPosts) => !prevShowPosts);
+    if (showMyPosts === false) {
+      setShowMyPosts((prevShowMyPosts) => !prevShowMyPosts);
+      setShowPosts((prevShowPosts) => !prevShowPosts);
+    }
+  };
+
   if (!user) return null;
 
   return (
-    <Box>
-      <Navbar />
+    <Box
+      display="flex"
+      flexDirection="column"
+      minHeight="100vh"
+      paddingBottom="1.5rem"
+    >
+      <Navbar onTogglePosts={handleTogglePosts} />
       <Box
         width="100%"
         padding="2rem 6%"
@@ -97,7 +112,7 @@ const ProfilePage = () => {
           flexBasis={isNonMobileScreens ? "42%" : undefined}
           mt={isNonMobileScreens ? undefined : "2rem"}
         >
-          {showPosts ? (
+          {showMyPosts ? (
             <>
               {loggedInUser._id === userId && (
                 <>
@@ -105,7 +120,14 @@ const ProfilePage = () => {
                   <Box m="2rem 0" />
                 </>
               )}
-              <PostsWidget userId={userId} isProfile />
+              {showPosts ? (
+                <PostsWidget userId={userId} />
+              ) : (
+                <Box flexBasis="26%">
+                  <Box m="2rem 0" />
+                  <NotFriendListWidget userId={userId} />
+                </Box>
+              )}
             </>
           ) : (
             <WidgetWrapper>
@@ -114,7 +136,7 @@ const ProfilePage = () => {
           )}
         </Box>
       </Box>
-      <Footer />
+      <Footer mt="auto" />
     </Box>
   );
 };
