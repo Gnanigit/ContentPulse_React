@@ -169,6 +169,12 @@ const Navbar = ({ onTogglePosts }) => {
             <Message sx={{ fontSize: "25px" }} />
             <Notifications sx={{ fontSize: "25px" }} />
             <Help sx={{ fontSize: "25px" }} />
+            <Tooltip title="Connect with more friends" arrow>
+              <PersonAdd
+                sx={{ fontSize: "25px", cursor: "pointer" }}
+                onClick={onTogglePosts}
+              />
+            </Tooltip>
             <FormControl variant="standard" value={fullName}>
               <Select
                 value={fullName}
