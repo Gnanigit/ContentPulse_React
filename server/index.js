@@ -26,8 +26,8 @@ app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-app.use(bodyParser.json({ limit: "900mb", extended: true }));
-app.use(bodyParser.urlencoded({ limit: "900mb", extended: true }));
+app.use(bodyParser.json({ limit: "50mb", extended: true }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
@@ -52,17 +52,25 @@ app.use((err, req, res, next) => {
 });
 
 /* MONGOOSE SETUP */
+// const PORT = process.env.PORT || 6001;
+// mongoose
+//   .connect(process.env.MONGOOSE_URL, {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//   })
+//   .then(() => {
+//     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
+
+//     /* ADD DATA ONE TIME */
+//     // User.insertMany(users);
+//     // Post.insertMany(posts);
+//   })
+//   .catch((error) => console.log(`${error} did not connect`));
+
 const PORT = process.env.PORT || 6001;
 mongoose
-  .connect(process.env.MONGOOSE_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGOOSE_URL)
   .then(() => {
     app.listen(PORT, () => console.log(`Server Port: ${PORT}`));
-
-    /* ADD DATA ONE TIME */
-    // User.insertMany(users);
-    // Post.insertMany(posts);
   })
   .catch((error) => console.log(`${error} did not connect`));

@@ -153,7 +153,7 @@ const UpdateProfile = ({ val }) => {
     try {
       const base64Picture = await getBase64(values.picture);
       values.picture = base64Picture;
-      console.log(values.picture);
+      // console.log(values.picture);
       const response = await fetch(`${BASE_URL}/users/${_id}/updatepic`, {
         method: "POST",
         headers: {
@@ -165,7 +165,7 @@ const UpdateProfile = ({ val }) => {
 
       const result = await response.json();
       if (!response.ok) {
-        setError("Old Password is Invalid");
+        setError("Failed to update picture");
       } else {
         onSubmitProps.resetForm();
         setChangeProfilePic(false);
