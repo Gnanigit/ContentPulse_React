@@ -100,16 +100,47 @@ export const updateGeneralDetails = async (req, res) => {
   try {
     const { id } = req.params;
     const userValues = req.body;
+
+    // Filter out empty values and email from being updated
     const filteredValues = Object.fromEntries(
       Object.entries(userValues).filter(
         ([key, value]) => value !== "" && key !== "email"
       )
     );
+
+    // Update the user's details
     const user = await User.findByIdAndUpdate({ _id: id }, filteredValues, {
       new: true,
     }).lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prepare an object for updating the user's details in the posts
+    const postUpdateFields = {};
+    if (filteredValues.firstName) {
+      postUpdateFields.firstName = filteredValues.firstName;
+    }
+    if (filteredValues.lastName) {
+      postUpdateFields.lastName = filteredValues.lastName;
+    }
+    if (filteredValues.location) {
+      postUpdateFields.location = filteredValues.location;
+    }
+
+    // Update the user's details in the posts collection if there are any changes
+    if (Object.keys(postUpdateFields).length > 0) {
+      await Post.updateMany({ userId: id }, postUpdateFields);
+    }
+
+    // Remove the password field from the user object
     delete user.password;
+
+    // Generate a new token
     const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
+
+    // Send the updated user data and token in the response
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });
@@ -149,19 +180,33 @@ export const updatePassword = async (req, res) => {
 };
 
 export const updateProfilePicture = async (req, res) => {
+  console.log("hello");
   try {
     const { id } = req.params;
     const picturePath = req.body.picture;
+    console.log(picturePath);
+
+    // Update the user's profile picture
     const user = await User.findByIdAndUpdate(
       { _id: id },
       { picturePath },
-      {
-        new: true,
-      }
+      { new: true }
     ).lean();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the profile picture in all the user's posts
+    await Post.updateMany({ userId: id }, { userPicturePath: picturePath });
+
+    // Remove the password field from the user object
     delete user.password;
+
+    // Generate a new token
     const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
 
+    // Send the updated user data and token in the response
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });

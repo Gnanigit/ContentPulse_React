@@ -16,6 +16,8 @@ import { updateUser } from "state";
 import Dropzone from "react-dropzone";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import { useNavigate } from "react-router-dom";
+import imageCompression from "browser-image-compression";
+
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const validateSVGViewBox = (file, callback) => {
@@ -151,9 +153,17 @@ const UpdateProfile = ({ val }) => {
     };
 
     try {
-      const base64Picture = await getBase64(values.picture);
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 200,
+      };
+      const compressedFile = await imageCompression(values.picture, options);
+
+      // Convert the compressed image to Base64
+      const base64Picture = await getBase64(compressedFile);
       values.picture = base64Picture;
-      // console.log(values.picture);
+
+      // Send the request to update the picture
       const response = await fetch(`${BASE_URL}/users/${_id}/updatepic`, {
         method: "POST",
         headers: {

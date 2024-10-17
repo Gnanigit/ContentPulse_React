@@ -24,6 +24,8 @@ import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPosts } from "state";
+import imageCompression from "browser-image-compression";
+
 const BASE_URL = process.env.REACT_APP_API_URL;
 
 const MyPostWidget = ({ picturePath }) => {
@@ -84,10 +86,24 @@ const MyPostWidget = ({ picturePath }) => {
     const formData = { userId: _id, description: post };
 
     if (image) {
-      const base64Picture = await getBase64(image);
-      formData.picturePath = base64Picture;
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(image, options);
+
+        // Convert the compressed image to Base64
+        const base64Picture = await getBase64(compressedFile);
+        formData.picturePath = base64Picture;
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        return;
+      }
     }
 
+    // Send the request to create the post
     const response = await fetch(`${BASE_URL}/posts`, {
       method: "POST",
       headers: {
@@ -96,12 +112,12 @@ const MyPostWidget = ({ picturePath }) => {
       },
       body: JSON.stringify(formData),
     });
+
     const posts = await response.json();
     dispatch(setPosts({ posts }));
     setImage(null);
     setPost("");
   };
-
   return (
     <WidgetWrapper>
       <FlexBetween gap="1.5rem">

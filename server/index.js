@@ -26,14 +26,16 @@ app.use(express.json());
 app.use(helmet());
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
-app.use(bodyParser.json({ limit: "50mb", extended: true }));
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+// app.use(bodyParser.json({ limit: "50mb", extended: true }));
+// app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 
 const corsOptions = {
-  // origin: "http://localhost:3000",
-  origin: "https://content-pulse-react.vercel.app",
+  origin: "http://localhost:3000",
+  // origin: "https://content-pulse-react.vercel.app",
   credentials: true,
 };
 app.use(cors(corsOptions));
