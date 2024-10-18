@@ -10,7 +10,6 @@ const NotFriendListWidget = ({ userId, isProfile = false }) => {
   const { palette } = useTheme();
 
   const token = useSelector((state) => state.token);
-  const friends = useSelector((state) => state.user.friends);
 
   const getNotFriends = async () => {
     const response = await fetch(`${BASE_URL}/users/${userId}/notfriends`, {

@@ -1,4 +1,8 @@
-import { PersonAddOutlined, PersonRemoveOutlined } from "@mui/icons-material";
+import {
+  PersonAddOutlined,
+  PersonRemoveOutlined,
+  DeleteOutline,
+} from "@mui/icons-material";
 import { Box, IconButton, Typography, useTheme } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +18,8 @@ const Friend = ({
   subtitle,
   userPicturePath,
   isProfile,
+  postId,
+  loggedInUserId,
 }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -39,8 +45,23 @@ const Friend = ({
     dispatch(setFriends({ friends: data }));
   };
 
+  const deletePost = async () => {
+    const response = await fetch(`${BASE_URL}/posts/${postId}/deletepost`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      console.error("Error deleting post");
+    }
+  };
+
   return (
-    <FlexBetween>
+    <FlexBetween sx={{ justifyContent: "space-between" }}>
       <FlexBetween gap="1rem">
         <UserImage image={userPicturePath} size="55px" />
         <Box
@@ -68,29 +89,24 @@ const Friend = ({
         </Box>
       </FlexBetween>
 
-      {_id !== friendId && !isProfile && (
-        <IconButton
-          onClick={() => patchFriend()}
-          sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-        >
-          {isFriend ? (
-            <PersonRemoveOutlined sx={{ color: primaryDark }} />
-          ) : (
-            <PersonAddOutlined sx={{ color: primaryDark }} />
-          )}
-        </IconButton>
-      )}
+      <FlexBetween>
+        {(_id !== friendId && !isProfile) || (isProfile && _id === userId) ? (
+          <IconButton
+            onClick={() => patchFriend()}
+            sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
+          >
+            {isFriend ? (
+              <PersonRemoveOutlined sx={{ color: primaryDark }} />
+            ) : (
+              <PersonAddOutlined sx={{ color: primaryDark }} />
+            )}
+          </IconButton>
+        ) : null}
+      </FlexBetween>
 
-      {isProfile && _id === userId && (
-        <IconButton
-          onClick={() => patchFriend()}
-          sx={{ backgroundColor: primaryLight, p: "0.6rem" }}
-        >
-          {isFriend ? (
-            <PersonRemoveOutlined sx={{ color: primaryDark }} />
-          ) : (
-            <PersonAddOutlined sx={{ color: primaryDark }} />
-          )}
+      {isProfile && loggedInUserId === _id && (
+        <IconButton onClick={deletePost}>
+          <DeleteOutline />
         </IconButton>
       )}
     </FlexBetween>

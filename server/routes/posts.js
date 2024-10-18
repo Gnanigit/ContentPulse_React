@@ -3,6 +3,7 @@ import {
   getFeedPosts,
   getUserPosts,
   likePost,
+  deletePost,
   addComment,
 } from "../controllers/posts.js";
 import { verifyToken } from "../middleware/auth.js";
@@ -18,4 +19,8 @@ router.patch("/:id/like", verifyToken, likePost);
 
 /* Add */
 router.post("/addcomment", addComment);
+
+/* Add */
+router.delete("/:id/deletepost", verifyToken, deletePost);
+
 export default router;

@@ -121,7 +121,7 @@ const ProfilePage = () => {
                 </>
               )}
               {showPosts ? (
-                <PostsWidget userId={userId} />
+                <PostsWidget userId={userId} isProfile={true} />
               ) : (
                 <Box flexBasis="26%">
                   <Box m="2rem 0" />

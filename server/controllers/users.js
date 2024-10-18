@@ -101,14 +101,12 @@ export const updateGeneralDetails = async (req, res) => {
     const { id } = req.params;
     const userValues = req.body;
 
-    // Filter out empty values and email from being updated
     const filteredValues = Object.fromEntries(
       Object.entries(userValues).filter(
         ([key, value]) => value !== "" && key !== "email"
       )
     );
 
-    // Update the user's details
     const user = await User.findByIdAndUpdate({ _id: id }, filteredValues, {
       new: true,
     }).lean();
@@ -117,7 +115,6 @@ export const updateGeneralDetails = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Prepare an object for updating the user's details in the posts
     const postUpdateFields = {};
     if (filteredValues.firstName) {
       postUpdateFields.firstName = filteredValues.firstName;
@@ -129,18 +126,14 @@ export const updateGeneralDetails = async (req, res) => {
       postUpdateFields.location = filteredValues.location;
     }
 
-    // Update the user's details in the posts collection if there are any changes
     if (Object.keys(postUpdateFields).length > 0) {
       await Post.updateMany({ userId: id }, postUpdateFields);
     }
 
-    // Remove the password field from the user object
     delete user.password;
 
-    // Generate a new token
     const token = jwt.sign({ id: id }, process.env.JWT_SECRET);
 
-    // Send the updated user data and token in the response
     res.status(200).json({ token, user });
   } catch (err) {
     res.status(404).json({ message: err.message });

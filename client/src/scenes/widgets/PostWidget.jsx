@@ -5,6 +5,7 @@ import {
   ShareOutlined,
   SendOutlined,
 } from "@mui/icons-material";
+
 import {
   Box,
   Divider,
@@ -74,14 +75,17 @@ const PostWidget = ({
   };
 
   return (
-    <WidgetWrapper m={isProfile ? "0" : "2rem 0"}>
+    <WidgetWrapper m={isProfile ? "2rem 0" : "2rem 0"}>
       <Friend
         friendId={postUserId}
         name={name}
         subtitle={location}
         userPicturePath={userPicturePath}
         isProfile={isProfile}
+        postId={postId}
+        loggedInUserId={loggedInUserId}
       />
+
       <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
       </Typography>
